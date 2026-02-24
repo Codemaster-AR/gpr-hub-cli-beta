@@ -23,7 +23,7 @@ from rich.live import Live
 from rich.text import Text
 from rich import box
 from rich.color import Color
-
+from KeyboardGate import KeyboardGate
 # Style components
 from colorama import init, Fore, Style
 from cinetext import cinetext_type, cinetext_rainbow, cinetext_pulse
@@ -265,9 +265,12 @@ class GPRHub:
 # MAIN EXECUTION LOOP
 # -------------------------------------------------------------------------
 def main():
+    gate = KeyboardGate()
+    gate.KeyboardGateDisable()
     hub = GPRHub()
     hub.show_banner()
     hub.check_for_updates()
+    gate.KeyboardGateEnable()
 
     while True:
         try:

@@ -16,7 +16,9 @@ setup(
         "cinetext",
         "keyboard",
         "KeyboardGate",
-        "pygame",
+        "Pillow",
+        "cryptography",
+        "rich",
         "requests",
     ],
     entry_points={
