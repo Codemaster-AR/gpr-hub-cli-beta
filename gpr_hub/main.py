@@ -265,6 +265,10 @@ class GPRHub:
 # MAIN EXECUTION LOOP
 # -------------------------------------------------------------------------
 def main():
+    if "--version" in sys.argv:
+        console.print(f"GPR Hub CLI {VERSION}")
+        sys.exit(0)
+
     gate = KeyboardGate()
     gate.KeyboardGateDisable()
     hub = GPRHub()

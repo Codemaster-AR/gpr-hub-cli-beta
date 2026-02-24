@@ -23,7 +23,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "gpr-hub=gpr_hub.main:run",
+            "gpr-hub=gpr_hub.main:main",
         ],
     },
     author="Anay Rustogi",
