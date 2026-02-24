@@ -17,7 +17,7 @@ setup(
         "keyboard",
         "KeyboardGate",
         "Pillow",
-        "cryptography",
+
         "rich",
         "requests",
     ],
