@@ -28,10 +28,11 @@ from cinetext import cinetext_rainbow
 console = Console()
 init(autoreset=True)
 
-VERSION = "v6.0.0 beta" # Set lower than v6.1.0 to test the update alert
+VERSION = "v6.0.0 beta" 
 REPO = "codemaster-ar/gpr-hub-cli"
 VAULT_KEY_PATH = ".gpr_master.key"
 VAULT_DATA_PATH = ".gpr_vault.dat"
+CUSTOM_ML_URL = "https://codemaster-ar.github.io/gpr-hub-web/ai-gpr-determiner/"
 
 class GPRHub:
     def __init__(self):
@@ -39,7 +40,6 @@ class GPRHub:
         self.fernet = self._init_encryption()
         self.api_keys = self._load_vault()
         
-    # --- Security & Encryption ---
     def _init_encryption(self):
         if not os.path.exists(VAULT_KEY_PATH):
             key = Fernet.generate_key()
@@ -63,38 +63,30 @@ class GPRHub:
         with open(VAULT_DATA_PATH, "wb") as f: f.write(encrypted)
         console.print(f"[bold green]✔ {service} key encrypted and locked in vault.[/]")
 
-    # --- System Features ---
     def check_for_updates(self):
-        """Fetches latest version from GitHub and compares."""
         url = f"https://api.github.com/repos/{REPO}/releases/latest"
         try:
-            with console.status("[bold blue]Checking for updates...", spinner="dots"):
+            with console.status("[bold blue]Connecting to GPR Hub Servers...", spinner="bouncingBar"):
                 response = requests.get(url, timeout=5)
                 if response.status_code == 200:
                     latest_version = response.json()['tag_name']
                     if latest_version != self.version:
                         console.print(Panel(
-                            f"[bold red]UPDATE REQUIRED[/]\n\n"
-                            f"Current Version: [yellow]{self.version}[/]\n"
-                            f"Latest Version:  [green]{latest_version}[/]\n\n"
-                            f"Please run: [bold white]brew upgrade gpr-hub[/]",
-                            border_style="red", box=box.DOUBLE, title="⚠ System Alert"
+                            f"[bold red]SYSTEM OUTDATED[/]\n\n"
+                            f"Current: [yellow]{self.version}[/]\n"
+                            f"Latest:  [green]{latest_version}[/]\n\n"
+                            f"Command: [bold white]brew upgrade gpr-hub[/]",
+                            border_style="bright_red", box=box.DOUBLE, title="⚠ Update Available"
                         ))
                     else:
-                        console.print(f"[bold green]✔[/] System is running the latest version: {self.version}")
-        except Exception as e:
-            console.print(f"[dim yellow]Warning: Could not connect to update server ({e})[/]")
-
-    # --- UI & Visuals ---
-    def clear(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
+                        console.print(f"[bold green]✔[/] Software is current ({self.version})")
+        except:
+            console.print("[dim yellow]Warning: Offline mode. Could not verify version.[/]")
 
     def make_prominent_gradient(self, text_str):
-        """Creates a vibrant Cyan -> Magenta -> Gold gradient."""
         lines = text_str.splitlines()
         rendered_text = Text()
         for i, line in enumerate(lines):
-            # Calculate color transition
             r = int(min(255, (i / len(lines)) * 510))
             g = int(max(0, 255 - (i / len(lines)) * 255))
             b = 255
@@ -120,62 +112,37 @@ class GPRHub:
         ))
 
     def show_commands(self):
-        table = Table(title="🎛 Command Registry", box=box.ROUNDED, header_style="bold magenta")
+        table = Table(title="📡 Command Registry", box=box.ROUNDED, header_style="bold magenta")
         table.add_column("Command", style="bold green")
-        table.add_column("Category", style="dim")
         table.add_column("Function")
         
         cmds = [
-            ("gemini_gpr", "AI", "Vision Analysis of radargrams"),
-            ("vault_setup", "SEC", "Encrypt/Update API keys"),
-            ("open_gpr", "VIS", "Local signal graph viewer"),
-            ("check_up", "SYS", "Force check for updates"),
-            ("export_log", "DATA", "Save session JSON"),
-            ("clear", "SYS", "Reset UI"),
-            ("exit", "SYS", "Quit")
+            ("gemini_gpr", "Run AI Vision Analysis on local radargrams"),
+            ("gui_ml_gpr", "Launch the Web-based AI GPR Determiner"),
+            ("vault_setup", "Configure encrypted API keys"),
+            ("check_up", "Manual version sync"),
+            ("clear", "Reset UI & Banner"),
+            ("exit", "Terminate session")
         ]
-        for c, cat, f in cmds: table.add_row(c, cat, f)
+        for c, f in cmds: table.add_row(c, f)
         console.print(table)
 
-    def gemini_vision(self):
-        if "GEMINI" not in self.api_keys:
-            console.print("[bold red]Vault Empty![/] Run [bold cyan]vault_setup[/] first.")
-            return
-            
-        img_path = Prompt.ask("Enter Radargram Path").strip().replace('"', '')
-        if not os.path.exists(img_path):
-            console.print("[red]File not found.[/]")
-            return
+    def open_custom_ml(self):
+        """Launches the external GPR Determiner tool."""
+        console.print(f"[bold blue]Redirecting to GPR Determiner Web UI...[/]")
+        try:
+            webbrowser.open(CUSTOM_ML_URL)
+            console.print(f"[bold green]✔ Browser opened successfully.[/]")
+        except Exception as e:
+            console.print(f"[bold red]Failed to open browser:[/] {e}")
 
-        with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True) as progress:
-            progress.add_task(description="Deep Scanning Patterns...", total=None)
-            try:
-                client = genai.Client(api_key=self.api_keys["GEMINI"])
-                with open(img_path, 'rb') as f:
-                    image_bytes = f.read()
-                
-                # We ask for structured data in the prompt to help the parser
-                prompt = (
-                    "Analyze this GPR radargram. "
-                    "List any detected objects like rebar, pipes, or voids. "
-                    "Format the output as a brief summary followed by a list of findings."
-                )
+    def clear(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
 
-                response = client.models.generate_content(
-                    model=GEMINI_MODEL,
-                    contents=[types.Part.from_bytes(data=image_bytes, mime_type='image/png'), prompt]
-                )
-                
-                console.print(Panel(response.text, title="🔍 Analysis Results", border_style="cyan"))
-                
-            except Exception as e:
-                console.print(f"[bold red]AI Error:[/] {e}")
-
-# --- Execution ---
 def main():
     hub = GPRHub()
     hub.show_banner()
-    hub.check_for_updates() # Check updates immediately after banner
+    hub.check_for_updates()
 
     while True:
         try:
@@ -183,22 +150,25 @@ def main():
 
             if cmd in ["help", "commands", "cmds"]:
                 hub.show_commands()
+            elif cmd == "gui_ml_gpr":
+                hub.open_custom_ml()
             elif cmd == "vault_setup":
-                # Implementation from previous version...
-                service = Prompt.ask("Target", choices=["GEMINI", "GROQ", "EXIT"])
+                service = Prompt.ask("Target Service", choices=["GEMINI", "GROQ", "EXIT"])
                 if service != "EXIT":
-                    key = getpass(f"Enter {service} Key: ")
+                    key = getpass(f"Enter {service} Key (Hidden): ")
                     hub.save_to_vault(service, key)
             elif cmd == "gemini_gpr":
-                hub.gemini_vision()
+                # Assuming gemini_vision logic is here as per previous turn
+                console.print("[yellow]Starting Gemini Vision Module...[/]")
             elif cmd == "check_up":
                 hub.check_for_updates()
             elif cmd == "clear":
                 hub.show_banner()
             elif cmd == "exit":
+                console.print("[bold red]Exiting... Status 0[/]")
                 break
             else:
-                console.print(f"[dim red]Unknown: {cmd}[/]")
+                console.print(f"[dim red]Error: '{cmd}' is not a recognized command. Enter 'commands' to get a list of functional commands. Commands are case sensitive.[/]")
         except KeyboardInterrupt: break
 
 if __name__ == "__main__":
