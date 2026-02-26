@@ -1,4 +1,4 @@
-# GPR Hub (Python Edition) CLI - Beta edition
+# GPR Hub (Python Edition) CLI - Beta edition - Tap repo: [https://github.com/codemaster-ar/homebrew-gpr-hub](https://github.com/codemaster-ar/homebrew-gpr-hub)
 
 GPR Hub is a command-line interface for reading and analyzing Ground-Penetrating Radar (GPR) images. It features AI-powered analysis using Google Gemini and Groq.
 
