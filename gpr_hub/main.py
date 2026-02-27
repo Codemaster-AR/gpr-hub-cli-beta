@@ -271,9 +271,11 @@ def main():
 
     gate = KeyboardGate()
     gate.KeyboardGateDisable()
+    time.sleep(1)  # Simulate some startup delay
     hub = GPRHub()
     hub.show_banner()
     hub.check_for_updates()
+    time.sleep(1)
     gate.KeyboardGateEnable()
 
     while True:
