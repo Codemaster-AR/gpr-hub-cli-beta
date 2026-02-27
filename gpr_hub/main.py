@@ -33,7 +33,7 @@ console = Console()
 init(autoreset=True)
 
 # --- GLOBAL CONFIGURATION ---
-VERSION = "v6.0.0-beta" # Set to trigger update alert
+VERSION = "v8.0.0-beta" # Set to trigger update alert
 REPO = "codemaster-ar/gpr-hub-cli-beta"
 VAULT_KEY_PATH = ".gpr_master.key"
 VAULT_DATA_PATH = ".gpr_vault.dat"
