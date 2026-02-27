@@ -33,7 +33,7 @@ console = Console()
 init(autoreset=True)
 
 # --- GLOBAL CONFIGURATION ---
-VERSION = "v8.0.0-beta" # Set to trigger update alert
+VERSION = "v9.0.0-beta" # Set to trigger update alert
 REPO = "codemaster-ar/gpr-hub-cli-beta"
 VAULT_KEY_PATH = ".gpr_master.key"
 VAULT_DATA_PATH = ".gpr_vault.dat"
@@ -194,7 +194,7 @@ class GPRHub:
                 if latest != self.version:
                     console.print(Panel(
                         f"[bold red]⚠ UPDATE AVAILABLE[/]\nLocal: {self.version} | Latest: {latest}\n"
-                        f"Run: [bold]brew upgrade gpr-hub-cli[/]",
+                        f"Run: [bold]brew upgrade gpr-hub-beta[/]",
                         border_style="bright_yellow", box=box.DOUBLE
                     ))
                 else:
@@ -246,7 +246,10 @@ class GPRHub:
             ("vault_setup", "Security", "Configure and encrypt API keys for Gemini/Groq"),
             ("history", "Session", "View current session activity logs"),
             ("clear", "UI", "Reset the terminal and redraw banner"),
-            ("exit", "System", "Safely terminate the application")
+            ("exit", "System", "Safely terminate the application"),
+            ("check_update", "System", "Check for latest version updates from GitHub"),
+            ("repositories", "Info", "List the GPR Hub repositories"),
+            ("about", "Info", "About the GPR-Hub-Beta you are running")
         ]
         for c, cat, desc in cmds:
             table.add_row(c, cat, desc)
@@ -260,6 +263,32 @@ class GPRHub:
         diag_table.add_row("Vault Status", "LOADED" if self.api_keys else "EMPTY")
         diag_table.add_row("Uptime", str(datetime.datetime.now() - self.session_start))
         console.print(diag_table)
+
+    def about(self):
+        table = Table(title="About:", box=box.ROUNDED, header_style="bold magenta")
+        table.add_column("Category:")
+        table.add_column("Details:", style="bold green", no_wrap=True)
+        
+        cmds = [
+            ("Version:", self.version),
+            ("Type:", "Beta CLI Release"),
+            ("Session ID:", self.session_id),
+            ("Uptime:", str(datetime.datetime.now() - self.session_start)),
+            ("Creator:", "Codemaster-AR"),
+            ("License:", "MIT License"),
+            ("Purpose:", "A cutting-edge CLI tool for Ground Penetrating Radar analysis and AI-driven subsurface intelligence.")
+
+        ]
+        for c, cat in cmds:
+            table.add_row(c, cat)
+        console.print(table)
+    def stable(self):
+        console.print(f"You are running version {self.version}.")
+        console.print("To get the stable release, run: [bold]brew install gpr-hub[/]")
+    def repositories(self):
+        console.print("Coming soon. Under first-stage testing.")
+
+                   
 
 # -------------------------------------------------------------------------
 # MAIN EXECUTION LOOP
@@ -302,13 +331,19 @@ def main():
             elif cmd == "clear":
                 hub.show_banner()
             elif cmd == "exit":
-                console.print("[bold red]Shutting down GPR Intelligence Suite. Goodbye.[/]")
+                console.print("[bold yellow]Shutting down GPR Intelligence Suite. Goodbye.[/]")
                 sys.exit(0)
+            elif cmd == "check_update":
+                hub.check_for_updates()
+            elif cmd == "about":
+                hub.about()
+            elif cmd == "stable":
+                hub.stable()
             else:
                 console.print(f"[dim red]Error: '{cmd}' not recognized. Type 'commands' for a list.")
         
         except KeyboardInterrupt:
-            console.print("\n[yellow]Interrupted by user. Exiting...[/]")
+            console.print("\n[bold red]Interrupted by user. Exiting...[/]")
             break
 
 if __name__ == "__main__":
