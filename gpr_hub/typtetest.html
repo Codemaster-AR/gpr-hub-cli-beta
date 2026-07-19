@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Typing Speed Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #result { font-size: 20px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>Typing Speed Calculator</h1>
+
+  <p>Typing speed is calculated as:</p>
+  <p>wordsTyped / timeInSeconds<  /p>
+
+  <script>
+    let wordsTyped = 0;
+    let timeInSeconds = 0;
+
+    // Track typing speed
+    function calculateSpeed() {
+      wordsTyped++;
+      timeInSeconds++;
+
+      // Display result
+      document.getElementById('result').textContent = `Typing speed: ${wordsTyped / timeInSeconds.toFixed(2)} words/s`;
+    }
+
+    // Start typing
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        calculateSpeed();
+      }
+    });
+
+    // Add a sample input
+    document.getElementById('words').textContent = "Type 10 words in 1 second.";
+  </script>
+
+  <div id="result"></div>
+  <input type="number" id="words" placeholder="Type words (10 for 1 sec)" />
+
+</body>
+</html>
